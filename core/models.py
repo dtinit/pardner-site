@@ -7,10 +7,6 @@ class BaseModel(models.Model):
 
     class Meta:
         abstract = True
-    
-    @classmethod
-    def create(cls, created_by):
-        return cls(created_by=created_by)
 
 
 class Study(BaseModel):
