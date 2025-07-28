@@ -1,11 +1,9 @@
-<!doctype html>
-<html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
-    <title>Pardner Demo Site</title>
-  </head>
-  <body>
-    <p>Hello world!</p>
-  </body>
-</html>
-
+{% extends "core/layouts/base.html" %}
+{% block head_title %}
+Pardner Demo Site
+{% endblock %}
+{% block content %}
+<p>
+  Hello world!
+</p>
+{% endblock %}
