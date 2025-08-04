@@ -7,7 +7,7 @@
   <body>
     <h1>{{ study.name }}</h1>
     <h2>{{ study.authors }}</h2>
-    <a href="#TODO">Get data from Tumblr</a>
+    {% if has_finished_oauth %}<p>Thanks for donating!</p>{% endif %}
+    <a href="{% url 'study_connect' study.id 'tumblr' %}">Get data from Tumblr</a>
   </body>
 </html>
-

@@ -24,7 +24,7 @@ env = environ.Env(
     DATABASE_URL=(str, f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}')
 )
 # Read .env file if it exists
-environ.Env.read_env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -35,7 +35,7 @@ SECRET_KEY = 'django-insecure-dafkg)4u0i@s&f523duas!d741qn-m+v_6sf9ipg%fdx7-&xz5
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -127,3 +127,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# OAuth credentials
+TUMBLR_CLIENT_ID = env.str('TUMBLR_CLIENT_ID')
+TUMBLR_CLIENT_SECRET = env.str('TUMBLR_CLIENT_SECRET')
