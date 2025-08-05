@@ -5,6 +5,9 @@ from django.urls import reverse
 from core.internal import get_transfer_service
 from .models import Study, ServiceAccount
 
+def _get_current_host(request):
+    return f'{request.scheme}://{request.get_host()}'
+
 
 def index(request):
     return render(request, "core/index.html")
@@ -23,7 +26,8 @@ def study_connect(request, study_id, transfer_service_name):
     Redirects to the authorization URL for the service of `transfer_service_name`
     and creates a `ServiceAccount` table entry.
     """
-    transfer_service_manager = get_transfer_service(transfer_service_name)
+    current_host = _get_current_host(request)
+    transfer_service_manager = get_transfer_service(transfer_service_name, current_host)
     if not transfer_service_manager:
         return HttpResponseNotFound('Service is not a part of the study.')
 
@@ -40,7 +44,8 @@ def callback(request, transfer_service_name):
     Endpoint that gets called when the user's browser is redirected by the
     authorization server after accepting or rejecting the OAuth request.
     """
-    transfer_service_manager = get_transfer_service(transfer_service_name)
+    current_host = _get_current_host(request)
+    transfer_service_manager = get_transfer_service(transfer_service_name, current_host)
     if not transfer_service_manager:
         return HttpResponseNotFound('Service is not a part of the study.')
 

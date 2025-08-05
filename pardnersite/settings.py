@@ -129,6 +129,5 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # OAuth credentials
-CALLBACK_HOST_DEV = "http://localhost:8000"
 TUMBLR_CLIENT_ID = env.str('TUMBLR_CLIENT_ID')
 TUMBLR_CLIENT_SECRET = env.str('TUMBLR_CLIENT_SECRET')
