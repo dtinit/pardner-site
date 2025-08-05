@@ -9,11 +9,15 @@
             {% endblock head_title %}
         </title>
         <link rel="stylesheet" href="{% static 'site.css' %}" />
+        <script src={% static 'site.js' %}></script>
         {% block extra_head %}
         {% endblock extra_head %}
     </head>
     <body>
         {% block body %}
+            <header>
+                Data Donation Site Demo
+            </header>
             {% if messages %}
                 <div>
                     <strong>Messages:</strong>
@@ -27,6 +31,10 @@
         {% endblock body %}
         {% block extra_body %}
         {% endblock extra_body %}
+        <div class="modal-backdrop" style="display: none;" id="modal-backdrop">
+            <div class="modal content-box" id="modal">
+            </div>
+        </div>
     </body>
 </html>
 

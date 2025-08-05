@@ -10,7 +10,10 @@ def _get_current_host(request):
 
 
 def index(request):
-    return render(request, "core/index.html")
+    studies = Study.objects.all();
+    return render(request, "core/index.html", {
+        'studies': studies
+    })
 
 
 def study_detail(request, study_id):
@@ -18,6 +21,20 @@ def study_detail(request, study_id):
     return render(request, "core/study/detail.html", {
         'study': study,
         'has_finished_oauth': request.GET.get('has_finished_oauth', False)
+    })
+
+
+def study_donation_modal(request, study_id):
+    study = get_object_or_404(Study, pk=study_id)
+    return render(request, "core/study/donation_modal.html", {
+        'study': study
+    })
+
+
+def study_donation_complete_modal(request, study_id):
+    study = get_object_or_404(Study, pk=study_id)
+    return render(request, "core/study/donation_complete_modal.html", {
+        'study': study
     })
 
 
@@ -71,3 +88,4 @@ def callback(request, transfer_service_name):
         study_id=service_account.study.id,
         permanent=True,
     )
+
