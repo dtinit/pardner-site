@@ -1,13 +1,40 @@
-<!doctype html>
-<html lang="en-US">
-  <head>
-    <meta charset="utf-8" />
-    <title>{{ study.name }}</title>
-  </head>
-  <body>
-    <h1>{{ study.name }}</h1>
-    <h2>{{ study.authors }}</h2>
-    {% if has_finished_oauth %}<p>Thanks for donating!</p>{% endif %}
-    <a href="{% url 'study_connect' study.id 'tumblr' %}">Get data from Tumblr</a>
-  </body>
-</html>
+{% extends "core/layouts/base.html" %}
+{% block head_title %}
+{{ study.name }}
+{% endblock %}
+{% block content %}
+<main class="study-detail">
+  <section class="content-box">
+    <h3>{{ study.name }}</h3>
+    <p>Author(s): {{ study.authors }}</p>
+    <p>
+      {% if study.description %}
+      {{ study.description }}
+      {% else %}
+      <i>No description provided</i>
+      {% endif %}
+    </p>
+    <div class="study__request">
+      <div>
+        Seeking donated data from <strong>Tumblr</strong>
+        <br />
+        <strong>Requesting access to the following</strong>
+        <ul>
+          <li>Post history</li>
+          <li>Comment history</li>
+        </ul>
+      </div>
+      <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id %}">Donate Data</button>
+    </div>
+  </section>
+</main>
+{% if has_finished_oauth %}
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.pardnersite){
+      window.pardnersite.triggerModal('{% url 'study_donation_complete_modal' study_id=study.id %}');
+    } 
+  });
+</script>
+{% endif %}
+{% endblock %}

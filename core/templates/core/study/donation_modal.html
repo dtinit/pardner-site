@@ -1,0 +1,61 @@
+<button class="modal__close js-close-modal">x</button>
+<div class="donation-modal js-modal-page">
+  <h1>Donate your data to {{ study.name }}</h1>
+  <p>
+    <strong>Before donating, please read and accept the following Study Agreement:</strong>
+    </p>
+    <div class="review-text">
+        <p>Welcome to this demonstration. This Study Agreement exists solely to simulate the experience of a data donation platform. Nothing here is real, binding, or legally enforceable. You're reading this as part of a test, prototype, or presentation.</p>
+
+        <h2>1. This Isn't Real</h2>
+        <p>This is a <strong>fake service</strong>. No real user accounts are accessed, no data is transmitted, and no actual services are integrated. This is only a mock-up for illustrative purposes.</p>
+
+        <h2>2. No Data Is Collected</h2>
+        <p>No personal, private, or identifiable data is collected, stored, or analyzed. The interface may simulate such actions, but it's all just smoke and mirrors. Your secrets are safe — mostly because we don’t know them.</p>
+
+        <h2>3. No Legal Relationship</h2>
+        <p>There is no contract formed by interacting with this demo. No obligations are created on your part or ours. You can stop reading at any time, but we appreciate your dedication if you’re still here.</p>
+
+        <h2>4. No Warranty, No Liability</h2>
+        <p>We offer zero guarantees that this demo will work correctly, look good, or make any sense. If it crashes, glitches, or causes existential reflection, we take no responsibility.</p>
+
+        <h2>5. Intellectual Property</h2>
+        <p>Any design elements, terminology, or interactions in this demo are either fictional or generic. They’re meant for simulation only and not intended to resemble real-world services, trademarks, or systems.</p>
+
+        <h2>6. Feedback Welcome</h2>
+        <p>If you have comments, suggestions, or questions, pretend to send them to an imaginary feedback box. Or just tell the person running the demo. Either works.</p>
+
+        <h2>7. TL;DR</h2>
+        <p>This is fake. It’s for demo purposes only. No real data, contracts, or obligations are involved. Please enjoy responsibly.</p>
+    </div>
+    <div class="modal__footer">
+        <button class="button js-close-modal">Cancel</button>
+        <button class="button button--primary" data-modal-page-trigger-for="2">Accept Study Agreement</button>
+    </div>
+</div>
+<div class="donation-modal js-modal-page">
+  <h1>Donate your data to {{ study.name }}</h1>
+  <p>
+    (Optional) Here is a plain-text outline of the data storage and retention policies for our organization:
+  </p>
+  <p>
+    (Optional, but encouraged) The data donated to this study will be [anonymized | not anonymized | other].
+  </p>
+  <label>
+    <input type="checkbox" />
+    (Optional) Donate my data to other studies in this organization currently seeking data donations from Tumblr.
+  </label>
+    <div class="modal__footer">
+        <button class="button js-close-modal">Cancel</button>
+        <a href="{% url 'study_connect' study.id 'tumblr' %}" class="button button--primary">Authorize Tumblr</a>
+    </div>
+</div>
+<div class="donation-modal js-modal-page">
+  <h1>Thank you!</h1>
+  <p>
+    You have successfully donated your data to {{ study.name }}. We appreciate your contribution!
+  </p>
+  <div class="modal__footer">
+      <button class="button button--primary js-close-modal">Close</button>
+  </div>
+</div>

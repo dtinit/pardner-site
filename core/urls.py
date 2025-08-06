@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     path("", views.index, name="index"),
     path("study/<int:study_id>/", views.study_detail, name="study_detail"),
+    path("study/<int:study_id>/donation-modal", views.study_donation_modal, name="study_donation_modal"),
+    path("study/<int:study_id>/donation-complete-modal", views.study_donation_complete_modal, name="study_donation_complete_modal"),
     path(
         "study/<int:study_id>/connect/<transfer_service_name>",
         views.study_connect,

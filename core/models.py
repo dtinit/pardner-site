@@ -14,6 +14,8 @@ class Study(BaseModel):
 
     name = models.CharField(max_length=240)
     authors = models.CharField(max_length=240)
+    description = models.TextField(blank=True, null=True)
+
 
 class ServiceAccount(BaseModel):
     class ServiceName(models.TextChoices):
@@ -28,3 +30,4 @@ class ServiceAccount(BaseModel):
 
     class Meta:
         indexes = [models.Index(fields=['state'])]
+
