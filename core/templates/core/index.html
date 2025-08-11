@@ -16,36 +16,11 @@ Pardner Demo Site
     <h2>Example Studies Seeking Data</h2>
     <ul class="study-list">
       {% for study in studies %}
-      <li class="study content-box">
-        <article>
-          <h3><a href="{% url 'study_detail' study_id=study.id %}">{{ study.name }}</a></h3>
-          <p>Author(s): {{ study.authors }}</p>
-          <p>
-            {% if study.description %}
-            {{ study.description }}
-            {% else %}
-            <i>No description provided</i>
-            {% endif %}
-          </p>
-          <div class="study__request">
-            <div>
-              Seeking donated data from <strong>Tumblr</strong>
-              <br />
-              <strong>Requesting access to the following</strong>
-              <ul>
-                <li>Post history</li>
-                <li>Comment history</li>
-              </ul>
-            </div>
-            <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id %}">Donate Data</button>
-          </div>
-        </article>
+      <li class="study-list-item">
+          {% include "core/fragments/study.html" with has_link_in_title=True %}
       </li>
       {% endfor %}
     </ul>
-  </section>
-  <section>
-    
   </section>
 </main>
 {% endblock %}

@@ -125,11 +125,11 @@ h1,h2,h3,h4{
   justify-content: space-between;
 }
 
-.homepage .study-list .study {
+.homepage .study-list .study-list-item {
   width: calc(50% - 15px);
 }
 
-.homepage .study-list .study .study__request {
+.homepage .study-list .study-list-item .service {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -142,10 +142,42 @@ h1,h2,h3,h4{
   gap: 15px;
 }
 
-/* Study detail page */
+/* Study page and fragments */
+.service-list {
+  display: grid;
+  gap: 12px;
+}
+
+.service {
+  margin-bottom: 20px;
+
+  p {
+    margin: 0;
+  }
+
+  ul {
+      list-style-type: "\2013";
+      padding-left: 10px;
+      margin: 0;
+  }
+  
+  li {
+      padding-left: 6px;
+  }
+}
+
 .study-detail {
   padding: 30px;
   display: flex;
   flex-direction: column;
   gap: 30px;
+
+  .button {
+    margin-top: 12px;
+  }
+
+  .service {
+    flex-direction: ;
+  }
 }
+
