@@ -47,6 +47,11 @@ h1,h2,h3,h4{
   text-decoration: none;
 }
 
+a.button {
+  text-align: center;
+  align-content: end;
+}
+
 .button:hover {
   background: #ddd;
 }
@@ -150,20 +155,20 @@ h1,h2,h3,h4{
 
 .service {
   margin-bottom: 20px;
+}
 
-  p {
-    margin: 0;
-  }
+.service p {
+  margin: 0;
+}
 
-  ul {
-      list-style-type: "\2013";
-      padding-left: 10px;
-      margin: 0;
-  }
+.service ul {
+  list-style-type: "\2013";
+  padding-left: 10px;
+  margin: 0;
+}
 
-  li {
-      padding-left: 6px;
-  }
+.service li {
+  padding-left: 6px;
 }
 
 .study-detail {
@@ -171,13 +176,8 @@ h1,h2,h3,h4{
   display: flex;
   flex-direction: column;
   gap: 30px;
-
-  .button {
-    margin-top: 12px;
-  }
-
-  .service {
-    flex-direction: ;
-  }
 }
 
+.study-detail .button {
+  margin-top: 12px;
+}

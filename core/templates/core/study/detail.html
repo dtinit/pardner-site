@@ -1,7 +1,7 @@
 {% extends "core/layouts/base.html" %}
 {% block head_title %}
 {{ study.name }}
-{% endblock head_title %}
+{% endblock %}
 {% block content %}
 <main class="study-detail">
   {% include "core/fragments/study.html" with is_full_page=True %}
@@ -15,4 +15,4 @@
   });
 </script>
 {% endif %}
-{% endblock content %}
+{% endblock %}
