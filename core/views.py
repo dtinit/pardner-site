@@ -3,14 +3,14 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 
 from core.internal import get_transfer_service
-from .models import Study, ServiceAccount
+from .models import Service, Study, ServiceAccount
 
 def _get_current_host(request):
     return f'{request.scheme}://{request.get_host()}'
 
 
 def index(request):
-    studies = Study.objects.all();
+    studies = Study.objects.all()
     return render(request, "core/index.html", {
         'studies': studies
     })
@@ -24,10 +24,12 @@ def study_detail(request, study_id):
     })
 
 
-def study_donation_modal(request, study_id):
+def study_donation_modal(request, study_id, service_id):
     study = get_object_or_404(Study, pk=study_id)
+    service = get_object_or_404(Service, pk=service_id)
     return render(request, "core/study/donation_modal.html", {
-        'study': study
+        'study': study,
+        'service': service
     })
 
 
@@ -38,20 +40,22 @@ def study_donation_complete_modal(request, study_id):
     })
 
 
-def study_connect(request, study_id, transfer_service_name):
+def study_connect(request, study_id, service_id):
     """
     Redirects to the authorization URL for the service of `transfer_service_name`
     and creates a `ServiceAccount` table entry.
     """
     current_host = _get_current_host(request)
-    transfer_service_manager = get_transfer_service(transfer_service_name, current_host)
+    service = get_object_or_404(Service, pk=service_id)
+    transfer_service_manager = get_transfer_service(service.name, current_host)
     if not transfer_service_manager:
         return HttpResponseNotFound('Service is not a part of the study.')
 
     study = get_object_or_404(Study, pk=study_id)
     auth_url, state = transfer_service_manager.authorization_url()
 
-    ServiceAccount(name=transfer_service_name, study=study, state=state).save()
+
+    ServiceAccount(service=service, study=study, state=state).save()
 
     return redirect(auth_url)
 

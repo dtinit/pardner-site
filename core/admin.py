@@ -1,7 +1,14 @@
 from django.contrib import admin
 from django.contrib.admin.decorators import register
-from .models import ServiceAccount, Study
+from .models import Service, ServiceAccount, Study, Vertical
 
+@register(Vertical)
+class VerticalAdmin(admin.ModelAdmin):
+    pass
+
+@register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    pass
 
 @register(Study)
 class StudyAdmin(admin.ModelAdmin):
@@ -10,4 +17,4 @@ class StudyAdmin(admin.ModelAdmin):
 
 @register(ServiceAccount)
 class ServiceAccount(admin.ModelAdmin):
-    list_display = ['id', 'name', 'study']
+    list_display = ['id', 'study']

@@ -18,17 +18,20 @@
         <br />
         <p>Seeking donated data from:</p>
         <div class="service-list">
+            {% for service in study.services.all %}
             <div class="service">
                 <div>
-                    <p><strong>Tumblr</strong></p>
+                    <p><strong>{{ service.name | title }}</strong></p>
                     <br />
                     <ul>
-                        <li>Post history</li>
-                        <li>Comment history</li>
+                        {% for vertical in service.verticals.all %}
+                        <li>{{ vertical.name | capfirst }}</li>
+                        {% endfor %}
                     </ul>
                 </div>
-                <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id %}">Donate Data</button>
+                <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id service_id=service.id %}">Donate Data</button>
             </div>
+            {% endfor %}
         </div>
     </article>
 </section>
