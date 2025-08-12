@@ -1,0 +1,34 @@
+<section class="content-box">
+    <article>
+        <h3>
+            {% if has_link_in_title %}
+            <a href="{% url 'study_detail' study_id=study.id %}">{{ study.name }}</a>
+            {% else %}
+            {{ study.name }}
+            {% endif %}
+        </h3>
+        <p>Author(s): {{ study.authors }}</p>
+        <p>
+            {% if study.description %}
+            {{ study.description | linebreaksbr }}
+            {% else %}
+            <i>No description provided</i>
+            {% endif %}
+        </p>
+        <br />
+        <p>Seeking donated data from:</p>
+        <div class="service-list">
+            <div class="service">
+                <div>
+                    <p><strong>Tumblr</strong></p>
+                    <br />
+                    <ul>
+                        <li>Post history</li>
+                        <li>Comment history</li>
+                    </ul>
+                </div>
+                <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id %}">Donate Data</button>
+            </div>
+        </div>
+    </article>
+</section>

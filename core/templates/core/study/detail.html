@@ -4,29 +4,7 @@
 {% endblock %}
 {% block content %}
 <main class="study-detail">
-  <section class="content-box">
-    <h3>{{ study.name }}</h3>
-    <p>Author(s): {{ study.authors }}</p>
-    <p>
-      {% if study.description %}
-      {{ study.description }}
-      {% else %}
-      <i>No description provided</i>
-      {% endif %}
-    </p>
-    <div class="study__request">
-      <div>
-        Seeking donated data from <strong>Tumblr</strong>
-        <br />
-        <strong>Requesting access to the following</strong>
-        <ul>
-          <li>Post history</li>
-          <li>Comment history</li>
-        </ul>
-      </div>
-      <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id %}">Donate Data</button>
-    </div>
-  </section>
+  {% include "core/fragments/study.html" %}
 </main>
 {% if has_finished_oauth %}
 <script>
