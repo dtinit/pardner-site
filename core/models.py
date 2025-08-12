@@ -33,9 +33,6 @@ class Study(BaseModel):
     description = models.TextField(blank=True, null=True)
     services = models.ManyToManyField(Service)
 
-    def get_service(self, service_name):
-        return self.services.filter(name = service_name)
-
 
 class ServiceAccount(BaseModel):
     service = models.ForeignKey(Service, on_delete=models.CASCADE, blank=True, null=True)
