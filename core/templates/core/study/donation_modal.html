@@ -43,19 +43,10 @@
   </p>
   <label>
     <input type="checkbox" />
-    (Optional) Donate my data to other studies in this organization currently seeking data donations from Tumblr.
+    (Optional) Donate my data to other studies in this organization currently seeking data donations from {{ service.name | title }}.
   </label>
     <div class="modal__footer">
         <button class="button js-close-modal">Cancel</button>
-        <a href="{% url 'study_connect' study.id 'tumblr' %}" class="button button--primary">Authorize Tumblr</a>
+        <a href="{% url 'study_connect' study.id service.id %}" class="button button--primary">Authorize {{ service.name | title }}</a>
     </div>
-</div>
-<div class="donation-modal js-modal-page">
-  <h1>Thank you!</h1>
-  <p>
-    You have successfully donated your data to {{ study.name }}. We appreciate your contribution!
-  </p>
-  <div class="modal__footer">
-      <button class="button button--primary js-close-modal">Close</button>
-  </div>
 </div>
