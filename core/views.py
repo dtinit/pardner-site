@@ -1,8 +1,7 @@
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.internal import get_transfer_service
-from core.internal.utils import fetch_and_store_token, get_current_host
+from core.internal import fetch_and_store_token, get_current_host, get_transfer_service
 from core.models import Service, ServiceAccount, Study
 
 
