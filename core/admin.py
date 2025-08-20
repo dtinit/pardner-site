@@ -8,13 +8,13 @@ class VerticalAdmin(admin.ModelAdmin):
 
 @register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'name']
 
 @register(Study)
 class StudyAdmin(admin.ModelAdmin):
-    list_display = ['name', 'authors']
+    list_display = ['id', 'name', 'authors']
     verbose_name_plural = 'studies'
 
 @register(ServiceAccount)
-class ServiceAccount(admin.ModelAdmin):
-    list_display = ['id', 'study']
+class ServiceAccountAdmin(admin.ModelAdmin):
+    list_display = ['id', 'study', 'completed_donation_at']

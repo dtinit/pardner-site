@@ -1,3 +1,4 @@
+{% load study_extras %}
 <section class="content-box">
     <article>
         <h3>
@@ -19,18 +20,7 @@
         <p>Seeking donated data from:</p>
         <div class="service-list">
             {% for service in study.services.all %}
-            <div class="service">
-                <div>
-                    <p><strong>{{ service.name | title }}</strong></p>
-                    <br />
-                    <ul>
-                        {% for vertical in service.verticals.all %}
-                        <li>{{ vertical.name | capfirst }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <button class="button button--primary" data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id service_id=service.id %}">Donate Data</button>
-            </div>
+                {% render_study_service %}
             {% endfor %}
         </div>
     </article>

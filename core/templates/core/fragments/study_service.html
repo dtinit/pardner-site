@@ -1,0 +1,19 @@
+<div class="service">
+    <div>
+        <p><strong>{{ service.name | title }}</strong></p>
+        <br />
+        <ul>
+            {% for vertical in service.verticals.all %}
+            <li>{{ vertical.name | capfirst }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <button 
+        class="button button--primary"
+        data-modal-trigger-for="{% url 'study_donation_modal' study_id=study.id service_id=service.id %}"
+        {% if service_account.has_completed_donation %}
+        title="Already donated" 
+        disabled 
+        {% endif %}
+    >Donate Data</button>
+</div>

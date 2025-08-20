@@ -9,6 +9,14 @@ def _get_redirect_url(service_account_name, host):
     return urljoin(host, f'/callback/{service_account_name.lower()}')
 
 
+def get_current_host(request):
+    return f'{request.scheme}://{request.get_host()}'
+
+
+def build_full_url(request):
+    return urljoin(get_current_host(request), request.path_info)
+
+
 def get_transfer_service(service_account_name, host):
     match service_account_name.lower():
         case Service.ServiceName.TUMBLR:

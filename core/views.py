@@ -1,12 +1,10 @@
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 
-from core.internal import get_transfer_service
-from .models import Service, Study, ServiceAccount
-
-def _get_current_host(request):
-    return f'{request.scheme}://{request.get_host()}'
+from core.internal import build_full_url, get_current_host, get_transfer_service
+from core.models import Service, Study, ServiceAccount
 
 
 def index(request):
@@ -45,17 +43,20 @@ def study_connect(request, study_id, service_id):
     Redirects to the authorization URL for the service of `transfer_service_name`
     and creates a `ServiceAccount` table entry.
     """
-    current_host = _get_current_host(request)
     service = get_object_or_404(Service, pk=service_id)
-    transfer_service_manager = get_transfer_service(service.name, current_host)
+    transfer_service_manager = get_transfer_service(
+        service.name, get_current_host(request)
+    )
     if not transfer_service_manager:
         return HttpResponseNotFound('Service is not a part of the study.')
 
-    study = get_object_or_404(Study, pk=study_id)
     auth_url, state = transfer_service_manager.authorization_url()
 
-
-    ServiceAccount(service=service, study=study, state=state).save()
+    service_account = ServiceAccount.objects.get_or_create_from_session(
+        study_id, request.session.session_key, service_id
+    )
+    service_account.state = state
+    service_account.save()
 
     return redirect(auth_url)
 
@@ -65,8 +66,9 @@ def callback(request, transfer_service_name):
     Endpoint that gets called when the user's browser is redirected by the
     authorization server after accepting or rejecting the OAuth request.
     """
-    current_host = _get_current_host(request)
-    transfer_service_manager = get_transfer_service(transfer_service_name, current_host)
+    transfer_service_manager = get_transfer_service(
+        transfer_service_name, get_current_host(request)
+    )
     if not transfer_service_manager:
         return HttpResponseNotFound('Service is not a part of the study.')
 
@@ -79,12 +81,15 @@ def callback(request, transfer_service_name):
     service_account = get_object_or_404(ServiceAccount, state=state)
 
     try:
-        token = transfer_service_manager.fetch_token(code=request.GET.get('code'))
+        token = transfer_service_manager.fetch_token(
+            authorization_response=build_full_url(request), code=request.GET.get('code')
+        )
         service_account.access_token = token['access_token']
+        service_account.completed_donation_at = timezone.now()
         service_account.save()
     except ValueError:
         return HttpResponseServerError('Error fetching token')
-    
+
     return redirect(
         reverse(
             'study_detail', args=[service_account.study.id], query={'has_finished_oauth': True}
