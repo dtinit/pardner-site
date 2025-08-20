@@ -35,6 +35,19 @@ class Study(BaseModel):
     description = models.TextField(blank=True, null=True)
     services = models.ManyToManyField(Service)
 
+    def get_num_services_remaining(self, session_id):
+        service_accounts = ServiceAccount.objects.filter(
+            session__pk=session_id, study__pk=self.id
+        )
+        if not service_accounts:
+            return -1
+
+        count = service_accounts.count()
+        for service_account in service_accounts:
+            if service_account.has_completed_donation:
+                count -= 1
+        return count
+
 
 class ServiceAccountManager(models.Manager):
     def get_or_create_from_session(self, study_id, session_id, service_id):

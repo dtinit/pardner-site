@@ -2,7 +2,13 @@
 <div class="donation-modal js-modal-page">
   <h1>Thank you!</h1>
   <p>
-    You have successfully donated your data to {{ study.name }}. We appreciate your contribution!
+    You have successfully donated your {{ service_name | title }} data to {{ study.name }}.
+    {% if num_services_remaining == 0 %}
+      You've donated all the data you can for this study!
+    {% elif num_services_remaining > 0 %}
+      You can still donate your data from {{ num_services_remaining }} service{{ num_services_remaining | pluralize }}.
+    {% endif %}
+    We appreciate your contribution!
   </p>
   <div class="modal__footer">
       <button class="button button--primary js-close-modal">Close</button>

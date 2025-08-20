@@ -1,10 +1,9 @@
 from django.http import HttpResponseNotFound, HttpResponseServerError
-from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse
-from django.utils import timezone
+from django.shortcuts import get_object_or_404, redirect, render
 
-from core.internal import build_full_url, get_current_host, get_transfer_service
-from core.models import Service, Study, ServiceAccount
+from core.internal import get_transfer_service
+from core.internal.utils import fetch_and_store_token, get_current_host
+from core.models import Service, ServiceAccount, Study
 
 
 def index(request):
@@ -16,10 +15,16 @@ def index(request):
 
 def study_detail(request, study_id):
     study = get_object_or_404(Study, pk=study_id)
-    return render(request, "core/study/detail.html", {
-        'study': study,
-        'has_finished_oauth': request.GET.get('has_finished_oauth', False)
-    })
+    return render(
+        request,
+        'core/study/detail.html',
+        {
+            'study': study,
+            'should_show_completion_modal': request.session.pop(
+                'has_finished_service_donation', False
+            ),
+        },
+    )
 
 
 def study_donation_modal(request, study_id, service_id):
@@ -33,9 +38,17 @@ def study_donation_modal(request, study_id, service_id):
 
 def study_donation_complete_modal(request, study_id):
     study = get_object_or_404(Study, pk=study_id)
-    return render(request, "core/study/donation_complete_modal.html", {
-        'study': study
-    })
+    return render(
+        request,
+        'core/study/donation_complete_modal.html',
+        {
+            'study': study,
+            'num_services_remaining': study.get_num_services_remaining(
+                request.session.session_key
+            ),
+            'service_name': request.session.pop('service_donated_name', ''),
+        },
+    )
 
 
 def study_connect(request, study_id, service_id):
@@ -81,20 +94,10 @@ def callback(request, transfer_service_name):
     service_account = get_object_or_404(ServiceAccount, state=state)
 
     try:
-        token = transfer_service_manager.fetch_token(
-            authorization_response=build_full_url(request), code=request.GET.get('code')
-        )
-        service_account.access_token = token['access_token']
-        service_account.completed_donation_at = timezone.now()
-        service_account.save()
+        fetch_and_store_token(request, transfer_service_manager, service_account)
+        request.session['has_finished_service_donation'] = True
+        request.session['service_donated_name'] = transfer_service_name
     except ValueError:
         return HttpResponseServerError('Error fetching token')
 
-    return redirect(
-        reverse(
-            'study_detail', args=[service_account.study.id], query={'has_finished_oauth': True}
-        ),
-        study_id=service_account.study.id,
-        permanent=True,
-    )
-
+    return redirect('study_detail', study_id=service_account.study.id)

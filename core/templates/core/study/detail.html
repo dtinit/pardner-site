@@ -6,7 +6,7 @@
 <main class="study-detail">
   {% include "core/fragments/study.html" %}
 </main>
-{% if has_finished_oauth %}
+{% if should_show_completion_modal %}
 <script>
   window.addEventListener('DOMContentLoaded', () => {
     if (window.pardnersite){
