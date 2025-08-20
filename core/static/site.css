@@ -65,6 +65,14 @@ a.button {
   background: #2563eb;
 }
 
+.button:disabled {
+  background: #b3b3b3;
+}
+
+.button:disabled:hover {
+  cursor: not-allowed;
+}
+
 .modal-backdrop {
   position: fixed;
   top: 0;
