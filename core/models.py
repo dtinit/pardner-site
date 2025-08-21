@@ -1,6 +1,7 @@
+from django.contrib.sessions.models import Session
 from django.db import models
 from django.utils import timezone
-from django.contrib.sessions.models import Session
+
 
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -25,6 +26,10 @@ class Service(BaseModel):
     name = models.CharField(max_length=240, choices=ServiceName)
     verticals = models.ManyToManyField(Vertical)
 
+    def __str__(self):
+        verticals = ', '.join([vertical.name for vertical in self.verticals.all()])
+        return f'{self.name} ({self.id}): {verticals}'
+
 
 class Study(BaseModel):
     class Meta:
@@ -34,6 +39,9 @@ class Study(BaseModel):
     authors = models.CharField(max_length=240)
     description = models.TextField(blank=True, null=True)
     services = models.ManyToManyField(Service)
+
+    def __str__(self):
+        return f'{self.name} ({self.id})'
 
     def get_num_services_remaining(self, session_id):
         service_accounts = ServiceAccount.objects.filter(

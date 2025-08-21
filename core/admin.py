@@ -1,15 +1,20 @@
 from django.contrib import admin
+from django.contrib.admin.templatetags.admin_urls import admin_urlname
+from django.shortcuts import resolve_url
+from django.utils.html import format_html
 
 from core.models import Service, ServiceAccount, Study, Vertical
 
 
-def _verticals_display(verticals):
-    return ', '.join([vertical.name for vertical in verticals])
+def generate_model_link(model_class, model_obj_field, action='change'):
+    url = resolve_url(admin_urlname(model_class._meta, action), model_obj_field.id)
+    return format_html(f'<a href="{url}">{model_obj_field}</a>')
 
 
 @admin.register(Vertical)
 class VerticalAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
+
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
@@ -17,7 +22,7 @@ class ServiceAdmin(admin.ModelAdmin):
 
     @admin.display(description='Vertical(s)')
     def verticals_display(self, obj):
-        return _verticals_display(obj.verticals.all())
+        return ', '.join([vertical.name for vertical in obj.verticals.all()])
 
 
 @admin.register(Study)
@@ -27,34 +32,18 @@ class StudyAdmin(admin.ModelAdmin):
 
     @admin.display(description='Service(s)')
     def service_display(self, obj):
-        services = []
-        for service in obj.services.all():
-            verticals = _verticals_display(service.verticals.all())
-            services.append(f'{service.name} ({service.id}) - {verticals}')
-        return '; '.join(services)
+        return '; '.join(str(service) for service in obj.services.all())
 
 
 @admin.register(ServiceAccount)
 class ServiceAccountAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
-        'study_display',
-        'service_display',
-        'verticals_display',
-        'completed_donation_at',
-    ]
+    list_display = ['id', 'link_to_study', 'link_to_service', 'completed_donation_at']
 
-    @admin.display(description='Study')
-    def study_display(self, obj):
-        return f'{obj.study.name} ({obj.study.id})'
+    def link_to_study(self, obj):
+        return generate_model_link(Study, obj.study)
 
-    @admin.display(description='Service')
-    def service_display(self, obj):
-        return f'{obj.service.name} ({obj.service.id})'
-
-    @admin.display(description='Vertical(s)')
-    def verticals_display(self, obj):
-        return ', '.join([vertical.name for vertical in obj.service.verticals.all()])
+    def link_to_service(self, obj):
+        return generate_model_link(Service, obj.service)
 
     actions = ['set_to_not_completed']
 
