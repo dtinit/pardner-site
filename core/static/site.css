@@ -127,8 +127,26 @@ a.button {
   gap: 30px;
 }
 
+.homepage--studies-list-header,
+.homepage--studies-list-header-selection-area {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-.homepage .study-list{
+.homepage--studies-list-header-selection-area p {
+  margin: 0 12px 0 0;
+  font-size: 16px;
+}
+
+.homepage--studies-list-header-dropdown {
+  padding: 8px 6px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  width: 240px;
+}
+
+.homepage .study-list {
   list-style: none;
   display: flex;
   flex-wrap: wrap;

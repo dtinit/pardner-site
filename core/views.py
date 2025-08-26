@@ -6,10 +6,16 @@ from core.models import Service, ServiceAccount, Study
 
 
 def index(request):
-    studies = Study.objects.all()
-    return render(request, "core/index.html", {
-        'studies': studies
-    })
+    service_names = set([service.name for service in Service.objects.all()])
+    return render(request, 'core/index.html', {'service_names': service_names})
+
+
+def study_list_items(request):
+    filtered_service_name = request.GET.get('filtered_service_name', None)
+    filtered_studies = Study.objects.filter_by_service(filtered_service_name)
+    return render(
+        request, 'core/fragments/study_list_items.html', {'studies': filtered_studies}
+    )
 
 
 def study_detail(request, study_id):
