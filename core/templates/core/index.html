@@ -13,13 +13,26 @@ Pardner Demo Site
     </p>
   </section>
   <section>
-    <h2>Example Studies Seeking Data</h2>
+    <div class="homepage--studies-list-header">
+      <h2>Example Studies Seeking Data</h2>
+      <div class="homepage--studies-list-header-selection-area">
+        <p><strong>Requested Services:</strong></p>
+        <form action="" method="get">
+          <select
+            class="homepage--studies-list-header-dropdown"
+            name="filtered_service_name"
+          >
+            <option value="" selected="selected">All</option>
+            <hr />
+            {% for service_name in service_names %}
+              <option value="{{ service_name }}">{{ service_name | title }}</option>
+            {% endfor %}
+          </select>
+        </form>
+      </div>
+    </div>
     <ul class="study-list">
-      {% for study in studies %}
-      <li class="study-list-item">
-          {% include "core/fragments/study.html" with has_link_in_title=True %}
-      </li>
-      {% endfor %}
+      {% include "core/fragments/study_list_items.html" %}
     </ul>
   </section>
 </main>

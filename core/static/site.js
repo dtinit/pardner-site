@@ -65,4 +65,27 @@
       triggerModal
     });
   });
+
+  const fetchAndRenderFilteredStudies = (serviceName) => {
+    const path = serviceName ? `/study_list_items?filtered_service_name=${encodeURIComponent(serviceName)}` : '/study_list_items';
+    fetch(path)
+      .then(response => response.text())
+      .then(studyListItemsHTML => {
+        const studyListOuterElements = document.getElementsByClassName('study-list');
+        for (const studyList of studyListOuterElements) {
+          studyList.innerHTML = studyListItemsHTML;
+        }
+      });
+  }
+  
+  document.addEventListener('DOMContentLoaded', () => {
+    const selectHTMLElements = document.getElementsByClassName("homepage--studies-list-header-dropdown");
+    if (selectHTMLElements.length > 0) {
+      const selectHTMLElement = selectHTMLElements.item(0);
+      // first time loading
+      fetchAndRenderFilteredStudies(selectHTMLElement.value);
+      // future changes
+      selectHTMLElement.addEventListener('change', (event) => fetchAndRenderFilteredStudies(event.target.value));
+    }
+  });
 })();

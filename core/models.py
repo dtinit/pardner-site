@@ -31,6 +31,13 @@ class Service(BaseModel):
         return f'{self.name} ({self.id}): {verticals}'
 
 
+class StudyManager(models.Manager):
+    def filter_by_service(self, service_name):
+        if not service_name:
+            return self.all()
+        return self.filter(services__name=service_name.lower()).distinct()
+
+
 class Study(BaseModel):
     class Meta:
         verbose_name_plural = 'studies'
@@ -39,6 +46,8 @@ class Study(BaseModel):
     authors = models.CharField(max_length=240)
     description = models.TextField(blank=True, null=True)
     services = models.ManyToManyField(Service)
+
+    objects = StudyManager()
 
     def __str__(self):
         return f'{self.name} ({self.id})'
@@ -55,6 +64,9 @@ class Study(BaseModel):
             if service_account.has_completed_donation:
                 count -= 1
         return count
+
+    def get_service_names(self):
+        return [service.name for service in self.services.all()]
 
 
 class ServiceAccountManager(models.Manager):

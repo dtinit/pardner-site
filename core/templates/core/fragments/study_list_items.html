@@ -1,0 +1,5 @@
+{% for study in studies %}
+<li class="study-list-item">
+    {% include "core/fragments/study.html" with has_link_in_title=True %}
+</li>
+{% endfor %}
