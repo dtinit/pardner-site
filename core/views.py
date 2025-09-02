@@ -6,8 +6,20 @@ from core.models import Service, ServiceAccount, Study
 
 
 def index(request):
-    service_names = set([service.name for service in Service.objects.all()])
-    return render(request, 'core/index.html', {'service_names': service_names})
+    default_service_name = request.session.pop('default_service_name', None)
+    return render(
+        request,
+        'core/index.html',
+        {
+            'service_names': Service.objects.unique_service_names(),
+            'default_service_name': default_service_name,
+        },
+    )
+
+
+def index_with_default(request, default_service_name):
+    request.session['default_service_name'] = default_service_name
+    return redirect('index')
 
 
 def study_list_items(request):
@@ -43,6 +55,7 @@ def study_donation_modal(request, study_id, service_id):
 
 def study_donation_complete_modal(request, study_id):
     study = get_object_or_404(Study, pk=study_id)
+    service_donated_name = request.session.pop('service_donated_name', '')
     return render(
         request,
         'core/study/donation_complete_modal.html',
@@ -51,7 +64,10 @@ def study_donation_complete_modal(request, study_id):
             'num_services_remaining': study.get_num_services_remaining(
                 request.session.session_key
             ),
-            'service_name': request.session.pop('service_donated_name', ''),
+            'service_donated_name': service_donated_name,
+            'service_names': Service.objects.unique_service_names(
+                excluded_names={service_donated_name}
+            ),
         },
     )
 

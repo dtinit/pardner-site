@@ -2,7 +2,7 @@
 <div class="donation-modal js-modal-page">
   <h1>Thank you!</h1>
   <p>
-    You have successfully donated your {{ service_name | title }} data to {{ study.name }}.
+    You have successfully donated your {{ service_donated_name | title }} data to {{ study.name }}.
     {% if num_services_remaining == 0 %}
       You've donated all the data you can for this study!
     {% elif num_services_remaining > 0 %}
@@ -10,6 +10,21 @@
     {% endif %}
     We appreciate your contribution!
   </p>
+  {% if service_names %}
+    <hr />
+    <p><strong>Consider donating data from other platforms! Here are studies seeking data from:</strong></p>
+    <div class="donation-modal--other-services-list">
+      {% for service_name in service_names %}
+        <div class="donation-modal--other-services-list--item">
+          <p><strong>{{ service_name | title }}</strong></p>
+          <a
+            href="{% url 'index_with_default' default_service_name=service_name %}"
+            title="See studies seeking {{ service_name | title }} data"
+          >Learn more</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
   <div class="modal__footer">
       <button class="button button--primary js-close-modal">Close</button>
   </div>
