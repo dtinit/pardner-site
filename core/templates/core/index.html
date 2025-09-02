@@ -22,10 +22,18 @@ Pardner Demo Site
             class="homepage--studies-list-header-dropdown"
             name="filtered_service_name"
           >
-            <option value="" selected="selected">All</option>
+            <option
+              value=""
+              {% if not default_service_name %}selected="selected"{% endif %}
+            >All</option>
             <hr />
             {% for service_name in service_names %}
-              <option value="{{ service_name }}">{{ service_name | title }}</option>
+              <option
+                value="{{ service_name }}"
+                {% if default_service_name and default_service_name == service_name %}
+                  selected="selected"
+                {% endif %}
+              >{{ service_name | title }}</option>
             {% endfor %}
           </select>
         </form>

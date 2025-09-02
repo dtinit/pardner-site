@@ -18,6 +18,17 @@ class Vertical(BaseModel):
     name = models.CharField(max_length=24, choices=VerticalName)
 
 
+class ServiceManager(models.Manager):
+    def unique_service_names(self, max_count=4, excluded_names=set()):
+        return set(
+            [
+                service.name
+                for service in self.all()
+                if service.name not in excluded_names
+            ][:max_count]
+        )
+
+
 class Service(BaseModel):
     class ServiceName(models.TextChoices):
         TUMBLR = 'tumblr'
@@ -25,6 +36,8 @@ class Service(BaseModel):
 
     name = models.CharField(max_length=240, choices=ServiceName)
     verticals = models.ManyToManyField(Vertical)
+
+    objects = ServiceManager()
 
     def __str__(self):
         verticals = ', '.join([vertical.name for vertical in self.verticals.all()])
