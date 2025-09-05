@@ -57,7 +57,7 @@
     );
     modalTriggers.forEach((triggerEl) => {
       const modalUrl = triggerEl.getAttribute(MODAL_TRIGGER_ATTRIBUTE_NAME);
-      triggerEl.addEventListener("click", () => {
+      triggerEl.addEventListener('click', () => {
         triggerModal(modalUrl);
       });
     });
@@ -70,7 +70,7 @@
   // rendered after DOMContentLoaded gets fired.
   const observer = new MutationObserver((mutationList, observer) => {
     mutationList.forEach((mutation) => {
-      if (mutation.type === "childList") {
+      if (mutation.type === 'childList') {
         addModalTriggers();
       }
     });
