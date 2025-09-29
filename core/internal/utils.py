@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 
 from django.utils import timezone
 from pardner.services import StravaTransferService, TumblrTransferService
-from pardner.verticals import Vertical
+from pardner.verticals import SocialPostingVertical
 
 from core.models import Service
 from pardnersite.settings import (
@@ -32,17 +32,18 @@ def get_transfer_service(service_account_name, host):
                 client_id=TUMBLR_CLIENT_ID,
                 client_secret=TUMBLR_CLIENT_SECRET,
                 redirect_uri=_get_redirect_url(service_account_name, host),
-                verticals={Vertical.FeedPost},
+                verticals={SocialPostingVertical},
             )
         case Service.ServiceName.STRAVA:
             return StravaTransferService(
                 client_id=STRAVA_CLIENT_ID,
                 client_secret=STRAVA_CLIENT_SECRET,
                 redirect_uri=_get_redirect_url(service_account_name, host),
-                verticals={Vertical.FeedPost},
+                verticals={SocialPostingVertical},
             )
         case _:
             return None
+
 
 def fetch_and_store_token(request, transfer_service_manager, service_account):
     token = transfer_service_manager.fetch_token(
