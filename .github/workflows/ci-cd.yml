@@ -1,0 +1,178 @@
+# Pardner Site CI/CD Pipeline
+#
+# This workflow provides continuous integration testing and automated deployment to Google Cloud Run.
+# - Push to main branch: Automatically deploys to Staging environment
+# - Manual trigger (workflow_dispatch): Deploy to Staging on demand
+#
+## Workflow Jobs
+#
+# 1) deploy - Deploy to Cloud Run Staging
+#
+## Deployment Flow
+#
+# - Push to main branch: Automatically deploys to Staging environment
+# - Manual trigger (workflow_dispatch): Deploy to Staging on demand
+#
+## Required Configuration
+#
+# ### GitHub Environment Variables (Staging)
+#
+# - GCP_PROJECT_ID: Google Cloud Platform project identifier
+# - CLOUD_RUN_SERVICE_NAME: Name of the Cloud Run service to deploy to
+# - SERVICE_ACCOUNT_NAME: Email address of the service account used for Cloud Run
+# - DATABASE_NAME: PostgreSQL database name in Cloud SQL
+#
+# ### GitHub Environment Secrets (Staging)
+#
+# - GCP_CREDENTIALS: JSON credentials for the GCP service account
+# - CLOUD_SQL_ICN: Cloud SQL Instance Connection Name (format: PROJECT:REGION:INSTANCE)
+# - POSTGRES_CREDENTIALS: PostgreSQL credentials (format: username:password)
+# - DJANGO_SECRET_KEY: Django secret key for cryptographic signing
+# - TUMBLR_CLIENT_ID: Tumblr OAuth client ID
+# - TUMBLR_CLIENT_SECRET: Tumblr OAuth client secret
+# - STRAVA_CLIENT_ID: Strava OAuth client ID (optional)
+# - STRAVA_CLIENT_SECRET: Strava OAuth client secret (optional)
+#
+## Deployment Steps (deploy job)
+#
+# The deploy job performs these operations:
+# 1. Checks out pardner-site repository
+# 2. Checks out pardner library repository (saved to pardner-lib/)
+# 3. Authenticates to Google Cloud Platform
+# 4. Runs database migrations via Cloud SQL Auth Proxy
+# 5. Deploys application to Cloud Run using --source flag (builds from Dockerfile)
+
+name: CI-CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # Deploy to Google Cloud Run
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: Staging
+      url: ${{ steps.extract_deployment_url.outputs.url }}
+    outputs:
+      url: ${{ steps.extract_deployment_url.outputs.url }}
+    env:
+      DJANGO_SETTINGS_MODULE: pardnersite.settings
+
+    steps:
+      - name: Checkout pardner-site repository
+        uses: actions/checkout@v4
+
+      - name: Checkout pardner library
+        uses: actions/checkout@v4
+        with:
+          repository: dtinit/pardner
+          path: pardner-lib
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pardner library
+        run: pip install ./pardner-lib
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create service-account-credentials.json
+        uses: jsdaniell/create-json@v1.2.3
+        with:
+          name: service-account-credentials.json
+          json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: URL-encode database credentials for special characters
+        env:
+          POSTGRES_CREDENTIALS: ${{ secrets.POSTGRES_CREDENTIALS }}
+        run: |
+          # URL encode credentials to handle special characters like *, !, (, )
+          # Extract and encode password securely without exposing it in logs
+          ENCODED_CREDENTIALS=$(python3 -c "
+          import urllib.parse, os, sys
+          try:
+              creds = os.environ['POSTGRES_CREDENTIALS']
+              if ':' in creds:
+                  user, password = creds.split(':', 1)
+                  encoded_password = urllib.parse.quote(password, safe='')
+                  print(f'{user}:{encoded_password}')
+              else:
+                  print(creds)
+          except Exception:
+              sys.exit(1)
+          ")
+          
+          if [ $? -eq 0 ]; then
+            echo "ENCODED_DB_CREDENTIALS=$ENCODED_CREDENTIALS" >> $GITHUB_ENV
+            echo "Database credentials encoded successfully"
+          else
+            echo "Failed to encode database credentials"
+            exit 1
+          fi
+
+      - name: Download and run the Cloud SQL Auth Proxy
+        run: |
+          curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.10.1/cloud-sql-proxy.linux.amd64
+          chmod +x cloud-sql-proxy
+          ./cloud-sql-proxy --address 0.0.0.0 --port 1234 ${{ secrets.CLOUD_SQL_ICN }} &
+
+      - name: Run migrations
+        env:
+          DJ_DATABASE_CONN_STRING: postgres://${{ env.ENCODED_DB_CREDENTIALS }}@localhost:1234/${{ vars.DATABASE_NAME }}
+          DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+          TUMBLR_CLIENT_ID: ${{ secrets.TUMBLR_CLIENT_ID }}
+          TUMBLR_CLIENT_SECRET: ${{ secrets.TUMBLR_CLIENT_SECRET }}
+          STRAVA_CLIENT_ID: ${{ secrets.STRAVA_CLIENT_ID }}
+          STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
+        run: python3 manage.py migrate
+
+      - name: Extract deployment URL
+        id: extract_deployment_url
+        run: |
+          # Generate the expected Cloud Run URL
+          SERVICE_NAME="${{ vars.CLOUD_RUN_SERVICE_NAME }}"
+          PROJECT_ID="${{ vars.GCP_PROJECT_ID }}"
+          REGION="us-central1"
+          
+          # Cloud Run URL format: https://SERVICE-NAME-PROJECT_HASH-REGION_CODE.a.run.app
+          # We'll use a placeholder since we don't know the hash until after first deploy
+          echo "url=https://${SERVICE_NAME}-${PROJECT_ID}-uc.a.run.app" >> $GITHUB_OUTPUT
+          echo "Deployment URL (approximate): https://${SERVICE_NAME}-${PROJECT_ID}-uc.a.run.app"
+
+      - name: Stop Cloud SQL Auth Proxy
+        run: pkill cloud-sql-proxy || true
+
+      - name: Deploy to Cloud Run
+        run: >
+          gcloud run deploy ${{ vars.CLOUD_RUN_SERVICE_NAME }}
+          --region us-central1
+          --source .
+          --service-account ${{ vars.SERVICE_ACCOUNT_NAME }}
+          --add-cloudsql-instances=${{ secrets.CLOUD_SQL_ICN }}
+          --set-env-vars DJANGO_SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
+          --set-env-vars DJ_DATABASE_CONN_STRING="postgres://${{ env.ENCODED_DB_CREDENTIALS }}@//cloudsql/${{ secrets.CLOUD_SQL_ICN }}/${{ vars.DATABASE_NAME }}"
+          --set-env-vars TUMBLR_CLIENT_ID="${{ secrets.TUMBLR_CLIENT_ID }}"
+          --set-env-vars TUMBLR_CLIENT_SECRET="${{ secrets.TUMBLR_CLIENT_SECRET }}"
+          --set-env-vars STRAVA_CLIENT_ID="${{ secrets.STRAVA_CLIENT_ID }}"
+          --set-env-vars STRAVA_CLIENT_SECRET="${{ secrets.STRAVA_CLIENT_SECRET }}"
+          --set-env-vars ALLOWED_HOSTS="*"
+          --set-env-vars DEBUG="False"
+          --allow-unauthenticated
