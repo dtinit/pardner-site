@@ -1,0 +1,57 @@
+# CI/CD
+.github/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Collected static files (will be regenerated in Dockerfile)
+staticfiles/
+
+# Note: pardner-lib/ should NOT be ignored - it's needed for the build
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Database
+*.sqlite3
+db.sqlite3
+db.sqlite3-journal
+
+# Documentation
+README.md
+*.md
+
+# Development files
+personal-development/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Mac
+.DS_Store

@@ -30,12 +30,16 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dafkg)4u0i@s&f523duas!d741qn-m+v_6sf9ipg%fdx7-&xz5'
+SECRET_KEY = env.str('DJANGO_SECRET_KEY', default='django-insecure-dafkg)4u0i@s&f523duas!d741qn-m+v_6sf9ipg%fdx7-&xz5')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['127.0.0.1', 'localhost'])
+
+# Cloud Run settings
+CSRF_TRUSTED_ORIGINS = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
@@ -52,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,8 +88,10 @@ WSGI_APPLICATION = 'pardnersite.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Support both DATABASE_URL (local) and DJ_DATABASE_CONN_STRING (Cloud SQL)
+database_url = env.str('DJ_DATABASE_CONN_STRING', default=env.str('DATABASE_URL', default=f'sqlite:///{os.path.join(BASE_DIR, "db.sqlite3")}'))
 DATABASES = {
-    'default': env.db()
+    'default': env.db_url('DATABASE_URL', default=database_url)
 }
 
 # Password validation
@@ -122,15 +129,26 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# WhiteNoise configuration
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# OAuth credentials
-TUMBLR_CLIENT_ID = env.str('TUMBLR_CLIENT_ID')
-TUMBLR_CLIENT_SECRET = env.str('TUMBLR_CLIENT_SECRET')
-STRAVA_CLIENT_ID = env.str('STRAVA_CLIENT_ID')
-STRAVA_CLIENT_SECRET =env.str('STRAVA_CLIENT_SECRET')
+# OAuth credentials (optional - app will start without Strava)
+TUMBLR_CLIENT_ID = env.str('TUMBLR_CLIENT_ID', default='')
+TUMBLR_CLIENT_SECRET = env.str('TUMBLR_CLIENT_SECRET', default='')
+STRAVA_CLIENT_ID = env.str('STRAVA_CLIENT_ID', default='')
+STRAVA_CLIENT_SECRET = env.str('STRAVA_CLIENT_SECRET', default='')
 

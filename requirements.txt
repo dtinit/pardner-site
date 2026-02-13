@@ -1,3 +1,5 @@
 django==5.2
 django-environ==0.12.0
-pardner @ git+ssh://git@github.com/dtinit/pardner.git@main
+gunicorn==23.0.0
+whitenoise==6.8.2
+psycopg2-binary==2.9.10
