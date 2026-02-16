@@ -184,6 +184,9 @@ jobs:
             --format='value(status.url)')
           
           SERVICE_HOST=$(echo $SERVICE_URL | sed 's|https://||')
+
+          echo "Service URL: $SERVICE_URL"
+          echo "Service Host: $SERVICE_HOST
           
           echo "Updating service with proper ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS"
           gcloud run services update ${{ vars.CLOUD_RUN_SERVICE_NAME }} \
