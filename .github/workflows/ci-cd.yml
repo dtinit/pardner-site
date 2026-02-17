@@ -173,6 +173,25 @@ jobs:
           --set-env-vars TUMBLR_CLIENT_SECRET="${{ secrets.TUMBLR_CLIENT_SECRET }}"
           --set-env-vars STRAVA_CLIENT_ID="${{ secrets.STRAVA_CLIENT_ID }}"
           --set-env-vars STRAVA_CLIENT_SECRET="${{ secrets.STRAVA_CLIENT_SECRET }}"
-          --set-env-vars ALLOWED_HOSTS="*"
           --set-env-vars DEBUG="False"
           --allow-unauthenticated
+
+      - name: Setup ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
+        run: |
+          echo "Fetching actual Cloud Run service URL"
+          SERVICE_URL=$(gcloud run services describe ${{ vars.CLOUD_RUN_SERVICE_NAME }} \
+            --region us-central1 \
+            --format='value(status.url)')
+          
+          SERVICE_HOST=$(echo $SERVICE_URL | sed 's|https://||')
+
+          echo "Service URL: $SERVICE_URL"
+          echo "Service Host: $SERVICE_HOST
+          
+          echo "Updating service with proper ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS"
+          gcloud run services update ${{ vars.CLOUD_RUN_SERVICE_NAME }} \
+            --region us-central1 \
+            --update-env-vars ALLOWED_HOSTS="$SERVICE_HOST" \
+            --update-env-vars CSRF_TRUSTED_ORIGINS="$SERVICE_URL"
+          
+          echo "CSRF protection setup successfully"
