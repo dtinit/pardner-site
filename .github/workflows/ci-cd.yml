@@ -21,6 +21,7 @@
 # - CLOUD_RUN_SERVICE_NAME: Name of the Cloud Run service to deploy to
 # - SERVICE_ACCOUNT_NAME: Email address of the service account used for Cloud Run
 # - DATABASE_NAME: PostgreSQL database name in Cloud SQL
+# - DEPLOYMENT_URL: Full Cloud Run service URL (e.g., https://service-name-123456.region.run.app)
 #
 # ### GitHub Environment Secrets (Staging)
 #
@@ -55,9 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: Staging
-      url: ${{ steps.extract_deployment_url.outputs.url }}
-    outputs:
-      url: ${{ steps.extract_deployment_url.outputs.url }}
+      url: ${{ vars.DEPLOYMENT_URL }}
     env:
       DJANGO_SETTINGS_MODULE: pardnersite.settings
 
@@ -144,54 +143,28 @@ jobs:
           STRAVA_CLIENT_SECRET: ${{ secrets.STRAVA_CLIENT_SECRET }}
         run: python3 manage.py migrate
 
-      - name: Extract deployment URL
-        id: extract_deployment_url
-        run: |
-          # Generate the expected Cloud Run URL
-          SERVICE_NAME="${{ vars.CLOUD_RUN_SERVICE_NAME }}"
-          PROJECT_ID="${{ vars.GCP_PROJECT_ID }}"
-          REGION="us-central1"
-          
-          # Cloud Run URL format: https://SERVICE-NAME-PROJECT_HASH-REGION_CODE.a.run.app
-          # We'll use a placeholder since we don't know the hash until after first deploy
-          echo "url=https://${SERVICE_NAME}-${PROJECT_ID}-uc.a.run.app" >> $GITHUB_OUTPUT
-          echo "Deployment URL (approximate): https://${SERVICE_NAME}-${PROJECT_ID}-uc.a.run.app"
-
       - name: Stop Cloud SQL Auth Proxy
         run: pkill cloud-sql-proxy || true
 
       - name: Deploy to Cloud Run
-        run: >
-          gcloud run deploy ${{ vars.CLOUD_RUN_SERVICE_NAME }}
-          --region us-central1
-          --source .
-          --service-account ${{ vars.SERVICE_ACCOUNT_NAME }}
-          --add-cloudsql-instances=${{ secrets.CLOUD_SQL_ICN }}
-          --set-env-vars DJANGO_SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}"
-          --set-env-vars DJ_DATABASE_CONN_STRING="postgres://${{ env.ENCODED_DB_CREDENTIALS }}@//cloudsql/${{ secrets.CLOUD_SQL_ICN }}/${{ vars.DATABASE_NAME }}"
-          --set-env-vars TUMBLR_CLIENT_ID="${{ secrets.TUMBLR_CLIENT_ID }}"
-          --set-env-vars TUMBLR_CLIENT_SECRET="${{ secrets.TUMBLR_CLIENT_SECRET }}"
-          --set-env-vars STRAVA_CLIENT_ID="${{ secrets.STRAVA_CLIENT_ID }}"
-          --set-env-vars STRAVA_CLIENT_SECRET="${{ secrets.STRAVA_CLIENT_SECRET }}"
-          --set-env-vars DEBUG="False"
-          --allow-unauthenticated
-
-      - name: Setup ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS
         run: |
-          echo "Fetching actual Cloud Run service URL"
-          SERVICE_URL=$(gcloud run services describe ${{ vars.CLOUD_RUN_SERVICE_NAME }} \
+          # Extract hostname from DEPLOYMENT_URL (remove https://)
+          ALLOWED_HOST=$(echo "${{ vars.DEPLOYMENT_URL }}" | sed 's|https://||')
+          
+          echo "Deploying to: ${{ vars.DEPLOYMENT_URL }}"
+          
+          gcloud run deploy ${{ vars.CLOUD_RUN_SERVICE_NAME }} \
             --region us-central1 \
-            --format='value(status.url)')
-          
-          SERVICE_HOST=$(echo $SERVICE_URL | sed 's|https://||')
-
-          echo "Service URL: $SERVICE_URL"
-          echo "Service Host: $SERVICE_HOST"
-          
-          echo "Updating service with proper ALLOWED_HOSTS and CSRF_TRUSTED_ORIGINS"
-          gcloud run services update ${{ vars.CLOUD_RUN_SERVICE_NAME }} \
-            --region us-central1 \
-            --update-env-vars ALLOWED_HOSTS="$SERVICE_HOST" \
-            --update-env-vars CSRF_TRUSTED_ORIGINS="$SERVICE_URL"
-          
-          echo "CSRF protection setup successfully"
+            --source . \
+            --service-account ${{ vars.SERVICE_ACCOUNT_NAME }} \
+            --add-cloudsql-instances=${{ secrets.CLOUD_SQL_ICN }} \
+            --set-env-vars DJANGO_SECRET_KEY="${{ secrets.DJANGO_SECRET_KEY }}" \
+            --set-env-vars DJ_DATABASE_CONN_STRING="postgres://${{ env.ENCODED_DB_CREDENTIALS }}@//cloudsql/${{ secrets.CLOUD_SQL_ICN }}/${{ vars.DATABASE_NAME }}" \
+            --set-env-vars TUMBLR_CLIENT_ID="${{ secrets.TUMBLR_CLIENT_ID }}" \
+            --set-env-vars TUMBLR_CLIENT_SECRET="${{ secrets.TUMBLR_CLIENT_SECRET }}" \
+            --set-env-vars STRAVA_CLIENT_ID="${{ secrets.STRAVA_CLIENT_ID }}" \
+            --set-env-vars STRAVA_CLIENT_SECRET="${{ secrets.STRAVA_CLIENT_SECRET }}" \
+            --set-env-vars ALLOWED_HOSTS="$ALLOWED_HOST" \
+            --set-env-vars CSRF_TRUSTED_ORIGINS="${{ vars.DEPLOYMENT_URL }}" \
+            --set-env-vars DEBUG="False" \
+            --allow-unauthenticated
