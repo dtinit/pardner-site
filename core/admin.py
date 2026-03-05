@@ -3,7 +3,7 @@ from django.contrib.admin.templatetags.admin_urls import admin_urlname
 from django.shortcuts import resolve_url
 from django.utils.html import format_html
 
-from core.models import Service, ServiceAccount, Study, Vertical
+from core.models import DonatedPost, Service, ServiceAccount, Study, Vertical
 
 
 def generate_model_link(model_class, model_obj_field, action='change'):
@@ -50,3 +50,15 @@ class ServiceAccountAdmin(admin.ModelAdmin):
     @admin.action(description='Set to not completed')
     def set_to_not_completed(self, request, queryset):
         queryset.update(completed_donation_at=None)
+
+
+@admin.register(DonatedPost)
+class DonatedPostAdmin(admin.ModelAdmin):
+    list_display = ['id', 'data_type', 'service_post_id', 'link_to_service_account', 'created_at']
+    list_filter = ['data_type']
+    readonly_fields = ['raw_data', 'created_at', 'updated_at']
+
+    def link_to_service_account(self, obj):
+        return generate_model_link(ServiceAccount, obj.service_account)
+
+    link_to_service_account.short_description = 'Service Account'
