@@ -1,7 +1,7 @@
 from django.http import HttpResponseNotFound, HttpResponseServerError
 from django.shortcuts import get_object_or_404, redirect, render
 
-from core.internal import fetch_and_store_token, get_current_host, get_transfer_service
+from core.internal import fetch_and_store_data, fetch_and_store_token, get_current_host, get_transfer_service
 from core.models import Service, ServiceAccount, Study
 
 
@@ -116,9 +116,12 @@ def callback(request, transfer_service_name):
 
     try:
         fetch_and_store_token(request, transfer_service_manager, service_account)
-        request.session['has_finished_service_donation'] = True
-        request.session['service_donated_name'] = transfer_service_name
     except ValueError:
         return HttpResponseServerError('Error fetching token')
+
+    fetch_and_store_data(transfer_service_manager, service_account, transfer_service_name)
+
+    request.session['has_finished_service_donation'] = True
+    request.session['service_donated_name'] = transfer_service_name
 
     return redirect('study_detail', study_id=service_account.study.id)

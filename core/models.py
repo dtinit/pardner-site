@@ -118,3 +118,18 @@ class ServiceAccount(BaseModel):
             if self.completed_donation_at
             else False
         )
+
+
+class DonatedPost(BaseModel):
+    class DataType(models.TextChoices):
+        TUMBLR_DASHBOARD_POST = 'tumblr_dashboard_post', 'Tumblr Dashboard Post'
+
+    service_account = models.ForeignKey(
+        ServiceAccount, on_delete=models.CASCADE, related_name='donated_posts'
+    )
+    data_type = models.CharField(max_length=240, choices=DataType)
+    service_post_id = models.CharField(max_length=240)
+    raw_data = models.JSONField()
+
+    def __str__(self):
+        return f'{self.data_type} {self.service_post_id} from {self.service_account}'
