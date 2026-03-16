@@ -66,7 +66,7 @@ def fetch_and_store_data(transfer_service_manager, service_account, service_name
     try:
         match service_name.lower():
             case Service.ServiceName.TUMBLR:
-                posts = transfer_service_manager.fetch_social_posting_vertical(
+                _, raw_posts = transfer_service_manager.fetch_social_posting_vertical(
                     text_only=False
                 )
                 DonatedPost.objects.bulk_create([
@@ -76,7 +76,7 @@ def fetch_and_store_data(transfer_service_manager, service_account, service_name
                         service_post_id=str(post.get('id', '')),
                         raw_data=post,
                     )
-                    for post in posts
+                    for post in raw_posts
                 ])
     except Exception as e:
         logger.exception(
