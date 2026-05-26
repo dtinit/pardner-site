@@ -6,3 +6,4 @@ psycopg2-binary==2.9.10
 pytest>=8.4.1
 pytest-django>=4.11.0
 pytest-mock>=3.14.1
+pardner @ git+ssh://git@github.com/dtinit/pardner.git@main
