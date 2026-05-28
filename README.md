@@ -57,6 +57,13 @@ To run locally, first install dependencies with pip:
 python -m pip install -r requirements.txt
 ```
 
+If working locally, also install pardner from the GitHub repository after activating 
+your virtual environment:
+
+```bash
+pip install git+ssh://git@github.com/dtinit/pardner.git@main
+```
+
 Then, initialize the local database:
 
 ```bash
